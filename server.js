@@ -1,6 +1,8 @@
 const express = require("express");
 const routes = require("./routes");
 const ExpressServer = express();
+require("dotenv").config();
+require("./config/db");
 
 const PORT = process.env.PORT || 8080;
 
