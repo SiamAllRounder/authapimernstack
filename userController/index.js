@@ -1,5 +1,6 @@
 const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 module.exports = {
   // validate req.body - Done
   // create MongoDB UserModel - Done
@@ -21,7 +22,40 @@ module.exports = {
       return res.status(500).json({ message: "error", error });
     }
   },
-  loginUser: (req, res) => {
-    res.send("ALHAAMDULILLAH login success");
+
+  // check user using email
+  // compare password
+  // create jwt token
+  // send response to client
+  loginUser: async (req, res) => {
+    // res.send("ALHAAMDULILLAH login success");
+    try {
+      const user = await UserModel.findOne({ email: req.body.email });
+      if (!user) {
+        return res
+          .status(401)
+          .json({ message: "Auth Failed, Invalid username/password" });
+      }
+      const isPassEqual = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+      if (!isPassEqual) {
+        return res
+          .status(401)
+          .json({ message: "Auth Failed, Invalid username/password" });
+      }
+      const tokenObject = {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+      };
+      const jwtToken = jwt.sign(tokenObject, process.env.SECRET, {
+        expiresIn: "4h",
+      });
+      return res.status(200).json({ jwtToken, tokenObject });
+    } catch (error) {
+      return res.status(500).json({ message: "error", error });
+    }
   },
 };

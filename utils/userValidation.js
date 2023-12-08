@@ -13,6 +13,19 @@ const userRegisterValidate = (req, res, next) => {
   next();
 };
 
+const userLoginValidate = (req, res, next) => {
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(4).alphanum().required(),
+  });
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: "Bad Request", error });
+  }
+  next();
+};
+
 module.exports = {
-  userRegisterValidate
+  userRegisterValidate,
+  userLoginValidate,
 };
